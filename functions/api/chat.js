@@ -89,6 +89,14 @@ export async function onRequestPost({ request, env }) {
   }
   if (messages[messages.length - 1].role !== "user") return json({ error: "A user question is required" }, 400);
 
+  const question = messages[messages.length - 1].content;
+  if (/(学历|学位|教育背景|硕士|本科|大学|education|degree|master|bachelor|mba|university|school)/i.test(question)) {
+    const answer = /[\u3400-\u9fff]/.test(question)
+      ? "张一明在约克大学舒立克商学院获得人工智能管理硕士（Master of Management in Artificial Intelligence，MMgt）；在多伦多大学获得荣誉理学学士（Honours Bachelor of Science，BSc），主修数学和物理，辅修统计学。"
+      : "Yiming holds a Master of Management in Artificial Intelligence (MMgt) from York University's Schulich School of Business, and an Honours Bachelor of Science (BSc) from the University of Toronto, where he majored in Mathematics and Physics and minored in Statistics.";
+    return json({ answer });
+  }
+
   try {
     const accountId = String(env.CLOUDFLARE_ACCOUNT_ID).trim();
     const upstream = await fetch(`https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/ai/v1/chat/completions`, {
