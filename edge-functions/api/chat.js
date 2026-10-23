@@ -66,9 +66,9 @@ function isRateLimited(request) {
 
 export async function onRequestPost({ request, env }) {
   if (!isAllowedOrigin(request)) return json({ error: "Forbidden" }, 403);
-  if (isRateLimited(request)) return json({ error: "Rate limit exceeded" }, 429);
+  if (isRateLimited(request)) return json({ answer: unavailableAnswer(request) });
   if (!env?.CLOUDFLARE_ACCOUNT_ID || !env?.CLOUDFLARE_AI_TOKEN) {
-    return json({ error: "Assistant is not configured" }, 503);
+    return json({ answer: unavailableAnswer(request) });
   }
 
   let body;
@@ -114,13 +114,13 @@ export async function onRequestPost({ request, env }) {
         max_tokens: MAX_OUTPUT_TOKENS,
       }),
     });
-    if (!upstream.ok) return json({ error: "Assistant request failed" }, 502);
+    if (!upstream.ok) return json({ answer: unavailableAnswer(request) });
     const result = await upstream.json();
     const content = result?.choices?.[0]?.message?.content;
     const answer = typeof content === "string" ? content.trim() : "";
-    if (!answer) return json({ error: "No answer was returned" }, 502);
+    if (!answer) return json({ answer: unavailableAnswer(request) });
     return json({ answer });
   } catch {
-    return json({ error: "Assistant request failed" }, 502);
+    return json({ answer: unavailableAnswer(request) });
   }
 }
