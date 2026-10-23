@@ -416,6 +416,35 @@ img{max-width:100%}
   .job ul,.card p,.skill p,.detail-block p,.detail-block li,.kv{color:#3a4356}
   .toc-card .tag{background:#e3ebfb;color:#2b4f9e}
 }
+
+/* Portfolio Q&A assistant */
+.ai-chat-launch{position:fixed;right:24px;bottom:24px;z-index:120;display:flex;align-items:center;gap:10px;border:0;border-radius:999px;padding:13px 18px;background:var(--navy);color:#fff;font:inherit;font-size:14px;font-weight:600;line-height:1.2;box-shadow:0 8px 26px rgba(23,37,56,.22);cursor:pointer}
+.ai-chat-launch:hover{background:#263c59}
+.ai-chat-launch:focus-visible,.ai-chat-close:focus-visible,.ai-chat-form button:focus-visible,.ai-chat-form textarea:focus-visible,.ai-chat-suggestion:focus-visible{outline:3px solid #8fb4ff;outline-offset:3px}
+.ai-chat-launch svg{width:19px;height:19px;flex:none}
+.ai-chat-panel{position:fixed;right:24px;bottom:88px;z-index:120;width:min(390px,calc(100vw - 28px));height:min(560px,calc(100dvh - 120px));display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:#fff;color:#172033;box-shadow:0 18px 54px rgba(23,37,56,.22)}
+.ai-chat-head{display:flex;align-items:center;gap:12px;padding:16px 18px;background:var(--navy);color:#fff}
+.ai-chat-avatar{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#fff;color:var(--navy);font-weight:800}
+.ai-chat-title{flex:1;min-width:0}
+.ai-chat-title strong{display:block;font-size:14px;line-height:1.4}
+.ai-chat-title span{display:block;color:#d3ddeb;font-size:12px}
+.ai-chat-close{display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:22px;cursor:pointer}
+.ai-chat-close:hover{background:rgba(255,255,255,.14)}
+.ai-chat-messages{flex:1;overflow:auto;padding:16px;scroll-behavior:smooth;background:#f8fafc}
+.ai-chat-message{max-width:88%;margin:0 0 12px;padding:10px 13px;border:1px solid #e5e9f0;border-radius:13px;background:#fff;font-size:13.5px;line-height:1.55;overflow-wrap:anywhere;white-space:pre-wrap}
+.ai-chat-message.user{margin-left:auto;border-color:#dce7fb;background:#edf3ff}
+.ai-chat-message.error{border-color:#f1d4d2;background:#fff8f7;color:#782d29}
+.ai-chat-suggestions{display:flex;flex-wrap:wrap;gap:7px;padding:0 14px 12px;background:#f8fafc}
+.ai-chat-suggestion{border:1px solid #d9e0e8;border-radius:999px;padding:7px 10px;background:#fff;color:#315f99;font:inherit;font-size:12px;font-weight:500;line-height:1.3;cursor:pointer}
+.ai-chat-suggestion:hover{border-color:#315f99;background:#f3f7fc}
+.ai-chat-form{display:flex;align-items:flex-end;gap:9px;padding:12px;border-top:1px solid var(--line);background:#fff}
+.ai-chat-form textarea{flex:1;min-height:42px;max-height:100px;resize:vertical;border:1px solid #cbd3df;border-radius:10px;padding:10px 11px;color:#172033;font:14px/1.4 inherit}
+.ai-chat-form textarea::placeholder{color:#788396}
+.ai-chat-form button{height:42px;padding:0 14px;border:0;border-radius:10px;background:#315f99;color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.ai-chat-form button:disabled{opacity:.55;cursor:wait}
+.ai-chat-note{margin:0;padding:0 14px 10px;background:#fff;color:#6c7889;font-size:10.5px;line-height:1.4}
+@media(max-width:520px){.ai-chat-launch{right:14px;bottom:14px;padding:12px 15px}.ai-chat-panel{right:8px;bottom:72px;width:calc(100vw - 16px);height:min(600px,calc(100dvh - 88px));}}
+@media(prefers-reduced-motion:reduce){.ai-chat-messages{scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -917,6 +946,53 @@ img{max-width:100%}
     button.addEventListener('click',function(){setLanguage(button.getAttribute('data-lang'));});
   });
   setLanguage('en');
+})();
+</script>
+<button class="ai-chat-launch" id="ai-chat-launch" type="button" aria-expanded="false" aria-controls="ai-chat-panel">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.75A2.75 2.75 0 0 1 6.75 3h10.5A2.75 2.75 0 0 1 20 5.75v7.5A2.75 2.75 0 0 1 17.25 16H11l-5.5 4v-4.15A2.75 2.75 0 0 1 4 13.25v-7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 8h8M8 11.5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+  <span data-chat-label="open">Ask AI</span>
+</button>
+<section class="ai-chat-panel" id="ai-chat-panel" role="dialog" aria-labelledby="ai-chat-title" hidden>
+  <header class="ai-chat-head">
+    <div class="ai-chat-avatar" aria-hidden="true">Y</div>
+    <div class="ai-chat-title"><strong id="ai-chat-title" data-chat-label="title">Yiming’s portfolio assistant</strong><span data-chat-label="subtitle">Ask about experience, projects, or skills</span></div>
+    <button class="ai-chat-close" id="ai-chat-close" type="button" aria-label="Close assistant">×</button>
+  </header>
+  <div class="ai-chat-messages" id="ai-chat-messages" role="log" aria-live="polite" aria-relevant="additions text"></div>
+  <div class="ai-chat-suggestions" id="ai-chat-suggestions">
+    <button class="ai-chat-suggestion" type="button" data-question-en="What did Yiming do at CIBC?" data-question-zh="Yiming 在 CIBC 做过什么？">CIBC experience</button>
+    <button class="ai-chat-suggestion" type="button" data-question-en="Tell me about his AI projects." data-question-zh="介绍一下他的 AI 项目。">AI projects</button>
+  </div>
+  <form class="ai-chat-form" id="ai-chat-form">
+    <textarea id="ai-chat-input" maxlength="800" rows="1" required aria-label="Ask a question" placeholder="Ask a question…"></textarea>
+    <button id="ai-chat-send" type="submit" data-chat-label="send">Send</button>
+  </form>
+  <p class="ai-chat-note" data-chat-label="note">Answers are based on the information published on this portfolio.</p>
+</section>
+<script>
+(function(){
+  var copy={
+    en:{open:'Ask AI',close:'Close assistant',title:'Yiming’s portfolio assistant',subtitle:'Ask about experience, projects, or skills',hello:'Hi! I can answer questions about Yiming’s experience, projects, education, and skills.',placeholder:'Ask a question…',send:'Send',thinking:'Thinking…',error:'Sorry, I could not get an answer right now. Please try again or use the contact links on this page.',notConnected:'The AI service is not connected in this local preview yet. It will reply after the page and /api/chat function are deployed to EdgeOne with the API key configured as a Secret.',note:'Answers are based on the information published on this portfolio.',q1:'CIBC experience',q2:'AI projects',label:'Ask a question'},
+    zh:{open:'问问 AI',close:'关闭助手',title:'张一明作品集助手',subtitle:'可咨询工作经历、项目和技能',hello:'你好！我可以介绍张一明的工作经历、项目、教育背景和技能。',placeholder:'输入你的问题…',send:'发送',thinking:'正在思考…',error:'抱歉，暂时无法生成回答。请稍后重试，或通过本页联系方式联系张一明。',notConnected:'本地预览还没有接入 AI 服务。网页和 /api/chat 函数部署到 EdgeOne，并配置好 API Secret 后，就可以正常回答。',note:'回答仅基于本作品集公开的信息。',q1:'CIBC 工作经历',q2:'AI 项目',label:'输入你的问题'}
+  };
+  var launch=document.getElementById('ai-chat-launch'),panel=document.getElementById('ai-chat-panel'),close=document.getElementById('ai-chat-close'),messages=document.getElementById('ai-chat-messages'),form=document.getElementById('ai-chat-form'),input=document.getElementById('ai-chat-input'),send=document.getElementById('ai-chat-send'),suggestions=document.getElementById('ai-chat-suggestions');
+  var history=[],busy=false,language='en';
+  function setLanguage(lang){language=lang==='zh-CN'?'zh':'en';var t=copy[language];document.querySelectorAll('[data-chat-label]').forEach(function(el){var key=el.getAttribute('data-chat-label');if(key==='open'||key==='title'||key==='subtitle'||key==='send'||key==='note')el.textContent=t[key];});launch.setAttribute('aria-label',t.open);close.setAttribute('aria-label',t.close);input.setAttribute('aria-label',t.label);input.placeholder=t.placeholder;var chips=suggestions.querySelectorAll('.ai-chat-suggestion');chips[0].textContent=t.q1;chips[1].textContent=t.q2;}
+  document.querySelectorAll('.lang button').forEach(function(button){button.addEventListener('click',function(){setLanguage(button.getAttribute('data-lang'));});});
+  function addMessage(text,kind){var item=document.createElement('div');item.className='ai-chat-message '+(kind||'');item.textContent=text;messages.appendChild(item);messages.scrollTop=messages.scrollHeight;return item;}
+  function openPanel(){panel.hidden=false;launch.setAttribute('aria-expanded','true');if(!messages.children.length)addMessage(copy[language].hello,'assistant');input.focus();}
+  function closePanel(){panel.hidden=true;launch.setAttribute('aria-expanded','false');launch.focus();}
+  launch.addEventListener('click',function(){if(panel.hidden)openPanel();else closePanel();});close.addEventListener('click',closePanel);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!panel.hidden)closePanel();});
+  async function ask(question){question=question.trim();if(!question||busy)return;busy=true;send.disabled=true;input.disabled=true;suggestions.hidden=true;addMessage(question,'user');history.push({role:'user',content:question});history=history.slice(-8);var thinking=addMessage(copy[language].thinking,'assistant');
+    send.textContent=copy[language].thinking;
+    try{var response=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:history})});var data=await response.json();if(!response.ok||!data.answer)throw new Error('Request failed');thinking.textContent=data.answer;history.push({role:'assistant',content:data.answer});history=history.slice(-8);}
+    catch(_){var disconnected=location.protocol==='file:'||(typeof response!=='undefined'&&[404,503].indexOf(response.status)!==-1);thinking.textContent=disconnected?copy[language].notConnected:copy[language].error;thinking.classList.add('error');history.pop();}
+    finally{busy=false;send.disabled=false;input.disabled=false;send.textContent=copy[language].send;input.focus();}
+  }
+  form.addEventListener('submit',function(e){e.preventDefault();var question=input.value;input.value='';ask(question);});
+  suggestions.addEventListener('click',function(e){var btn=e.target.closest('[data-question-en]');if(btn)ask(language==='zh'?btn.dataset.questionZh:btn.dataset.questionEn);});
+  setLanguage(document.documentElement.lang);
 })();
 </script>
 </body>
